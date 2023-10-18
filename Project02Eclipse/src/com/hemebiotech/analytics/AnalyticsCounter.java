@@ -1,43 +1,76 @@
 package com.hemebiotech.analytics;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader; //library which gives functionalities to work with files
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException; // library  provides us with useful data structures like Maps.
+import java.util.HashMap;
+import java.util.Map;
 
-public class AnalyticsCounter {
-	private static int headacheCount = 0;	// initialize to 0
-	private static int rashCount = 0;		// initialize to 0
-	private static int pupilCount = 0;		// initialize to 0
-	
-	public static void main(String args[]) throws Exception {
-		// first get input
-		BufferedReader reader = new BufferedReader (new FileReader("symptoms.txt"));
-		String line = reader.readLine();
+public class AnalyticsCounter { // erased
+	public static void main(String args) { // main function / erased throws exeption bc dealed with in/outputFileName
+		String inputFileName = "symptoms.txt"; // read the symptoms
+		String outputFileName = "result.out"; // save results
 
-		int i = 0;	// set i to 0
-		int headCount = 0;	// counts headaches
-		while (line != null) {
-			i++;	// increment i
-			System.out.println("symptom from file: " + line);
-			if (line.equals("headache")) {
-				headCount++;
-				System.out.println("number of headaches: " + headCount);
-			}
-			else if (line.equals("rush")) {
-				rashCount++;
-			}
-			else if (line.contains("pupils")) {
-				pupilCount++;
+		try (BufferedReader reader = new BufferedReader(new FileReader(inputFileName));
+				FileWriter writer = new FileWriter(outputFileName)) { // changed symptoms.txt by inputFileName &
+																		// try-with-resources close ressources to avoid
+																		// saturation and disponibility
+
+			Map<String, Integer> symptomCounts = new HashMap<>(); // using map to stock & way to associate symptoms with
+																	// occurency
+			String line; // temporary content while reading inputFileName
+
+			while ((line = reader.readLine()) != null) { // loop that reads the lines of the symptoms file one by one
+															// until there are no more lines to read
+				if (!line.isEmpty()) { // way to count occurency of symptoms
+					symptomCounts.put(line, symptomCounts.getOrDefault(line, 0) + 1); // if 0 ocurency, add 1, if
+																						// already there, add 1
+				}
 			}
 
-			line = reader.readLine();	// get another symptom
+			for (Map.Entry<String, Integer> entry : symptomCounts.entrySet()) { // way to avoid writing code for each
+																				// symptoms
+				writer.write(entry.getKey() + ": " + entry.getValue() + "\n"); // write results of symptoms/occurency
+																				// report
+			}
+
+			System.out.println("Report finished and wrote in" + outputFileName); // write it in
+																					// outputFileName/result.out
+		} catch (IOException e) { // way to detect errors
+			e.printStackTrace(); // print the errors
 		}
-		
-		// next generate output
-		FileWriter writer = new FileWriter ("result.out");
-		writer.write("headache: " + headacheCount + "\n");
-		writer.write("rash: " + rashCount + "\n");
-		writer.write("dialated pupils: " + pupilCount + "\n");
-		writer.close();
 	}
 }
+
+/**
+ * package com.hemebiotech.analytics;
+ * 
+ * import java.util.List;
+ * import java.util.Map;
+ * 
+ * public class AnalyticsCounter { // erased
+ * public static void main(String args) { // main function / erased throws
+ * exeption bc dealed with in/outputFileName
+ * String inputFileName = "symptoms.txt"; // read the symptoms
+ * String outputFileName = "result.out"; // save results
+ * 
+ * // Lire les symptômes à partir du fichier
+ * ISymptomReader symptomReader = new ReadSymptomDataFromFile(inputFileName);
+ * List<String> symptoms = symptomReader.GetSymptoms();
+ * 
+ * // Compter les symptômes et stocker les résultats dans une Map
+ * Map<String, Integer> symptomCounts = SymptomCounter.countSymptoms(symptoms);
+ * 
+ * // Créer une instance de WriteSymptomDataToFile pour écrire les résultats
+ * dans
+ * // "result.out"
+ * WriteSymptomDataToFile writer = new WriteSymptomDataToFile(outputFileName);
+ * 
+ * // Écrire les résultats dans le fichier de sortie
+ * writer.writeSymptoms(symptomCounts);
+ * 
+ * System.out.println("Report finished and wrote in " + outputFileName);
+ * }
+ * }
+ */
