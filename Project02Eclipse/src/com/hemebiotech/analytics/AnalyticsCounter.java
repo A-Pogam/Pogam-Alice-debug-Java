@@ -1,76 +1,65 @@
 package com.hemebiotech.analytics;
 
-import java.io.BufferedReader; //library which gives functionalities to work with files
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException; // library  provides us with useful data structures like Maps.
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class AnalyticsCounter { // erased
-	public static void main(String args) { // main function / erased throws exeption bc dealed with in/outputFileName
-		String inputFileName = "symptoms.txt"; // read the symptoms
-		String outputFileName = "result.out"; // save results
+public class AnalyticsCounter {
+	private ISymptomReader reader; // Instance of ISymptomReader for reading symptoms
+	private ISymptomWriter writer; // Instance of ISymptomWriter for writing symptoms
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(inputFileName));
-				FileWriter writer = new FileWriter(outputFileName)) { // changed symptoms.txt by inputFileName &
-																		// try-with-resources close ressources to avoid
-																		// saturation and disponibility
+	// Constructor to initialize the reader and writer
+	public AnalyticsCounter(ISymptomReader reader, ISymptomWriter writer) {
+		this.reader = reader;
+		this.writer = writer;
+	}
 
-			Map<String, Integer> symptomCounts = new HashMap<>(); // using map to stock & way to associate symptoms with
-																	// occurency
-			String line; // temporary content while reading inputFileName
+	// Get the list of symptoms from the data source
+	public List<String> getSymptoms() {
+		return reader.GetSymptoms();
+	}
 
-			while ((line = reader.readLine()) != null) { // loop that reads the lines of the symptoms file one by one
-															// until there are no more lines to read
-				if (!line.isEmpty()) { // way to count occurency of symptoms
-					symptomCounts.put(line, symptomCounts.getOrDefault(line, 0) + 1); // if 0 ocurency, add 1, if
-																						// already there, add 1
-				}
+	// Count the occurrences of each symptom
+	public Map<String, Integer> countSymptoms(List<String> symptoms) {
+		Map<String, Integer> symptomCounts = new HashMap<>(); // Create a map to store symptom counts
+		for (String symptom : symptoms) { // Iterate through the list of symptoms
+			if (!symptom.isEmpty()) { // Check if the symptom is not empty
+				symptomCounts.put(symptom, symptomCounts.getOrDefault(symptom, 0) + 1);
+				// Increment the count for the symptom or initialize it to 1
 			}
-
-			for (Map.Entry<String, Integer> entry : symptomCounts.entrySet()) { // way to avoid writing code for each
-																				// symptoms
-				writer.write(entry.getKey() + ": " + entry.getValue() + "\n"); // write results of symptoms/occurency
-																				// report
-			}
-
-			System.out.println("Report finished and wrote in" + outputFileName); // write it in
-																					// outputFileName/result.out
-		} catch (IOException e) { // way to detect errors
-			e.printStackTrace(); // print the errors
 		}
+		return symptomCounts; // Return the map of symptom counts
+	}
+
+	// Sort the symptoms alphabetically
+	public Map<String, Integer> sortSymptoms(Map<String, Integer> symptoms) {
+		Map<String, Integer> sortedSymptoms = new TreeMap<>(symptoms); // Create a TreeMap for sorting
+		return sortedSymptoms; // Return the sorted map
+	}
+
+	// Write the symptoms and their counts to the output file
+	public void writeSymptoms(Map<String, Integer> symptoms) {
+		writer.writeSymptoms(symptoms); // Delegate the writing to the ISymptomWriter
+	}
+
+	// Generate the symptom report by orchestrating the steps
+	public void generateReport() {
+		List<String> symptoms = getSymptoms(); // Get the list of symptoms
+		Map<String, Integer> symptomCounts = countSymptoms(symptoms); // Count the occurrences
+		Map<String, Integer> sortedSymptoms = sortSymptoms(symptomCounts); // Sort alphabetically
+		writeSymptoms(sortedSymptoms); // Write the report to the output file
+		System.out.println("Report generated and written to the output file.");
+	}
+
+	// The entry point of the application
+	public static void main(String[] args) {
+		String inputFileName = "symptoms.txt"; // Input file name
+		String outputFileName = "result.out"; // Output file name
+
+		// Create an instance of AnalyticsCounter with the appropriate reader and writer
+		AnalyticsCounter counter = new AnalyticsCounter(new ReadSymptomDataFromFile(inputFileName),
+				new WriteSymptomDataToFile(outputFileName));
+		counter.generateReport(); // Generate and write the symptom report
 	}
 }
-
-/**
- * package com.hemebiotech.analytics;
- * 
- * import java.util.List;
- * import java.util.Map;
- * 
- * public class AnalyticsCounter { // erased
- * public static void main(String args) { // main function / erased throws
- * exeption bc dealed with in/outputFileName
- * String inputFileName = "symptoms.txt"; // read the symptoms
- * String outputFileName = "result.out"; // save results
- * 
- * // Lire les symptômes à partir du fichier
- * ISymptomReader symptomReader = new ReadSymptomDataFromFile(inputFileName);
- * List<String> symptoms = symptomReader.GetSymptoms();
- * 
- * // Compter les symptômes et stocker les résultats dans une Map
- * Map<String, Integer> symptomCounts = SymptomCounter.countSymptoms(symptoms);
- * 
- * // Créer une instance de WriteSymptomDataToFile pour écrire les résultats
- * dans
- * // "result.out"
- * WriteSymptomDataToFile writer = new WriteSymptomDataToFile(outputFileName);
- * 
- * // Écrire les résultats dans le fichier de sortie
- * writer.writeSymptoms(symptomCounts);
- * 
- * System.out.println("Report finished and wrote in " + outputFileName);
- * }
- * }
- */
