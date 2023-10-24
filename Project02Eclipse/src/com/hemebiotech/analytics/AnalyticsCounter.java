@@ -54,7 +54,9 @@ public class AnalyticsCounter {
 
 	// The entry point of the application
 	public static void main(String[] args) {
-		String inputFileName = "symptoms.txt"; // Input file name
+		String inputFileName = "../symptoms.txt"; // Input
+													// file
+													// name
 		String outputFileName = "result.out"; // Output file name
 
 		// Create an instance of AnalyticsCounter with the appropriate reader and writer
